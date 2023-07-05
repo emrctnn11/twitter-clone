@@ -53,16 +53,19 @@ const LoginModal = () => {
   );
 
   const footerContent = (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-row gap-4">
-        <span>Dont have an account?</span>
+    <div className="text-neutral-400 text-center mt-4">
+      <p>
+        Dont have an account?{" "}
+        {/* Changed span to button and added some styling */}
         <button
-          onClick={openRegisterDialog}
-          className="text-white cursor-pointer underline"
+          onClick={() => openRegisterDialog()}
+          className="text-white cursor-pointer hover:underline bg-transparent border-none outline-none"
+          role="button"
         >
-          Sign Up
+          {" "}
+          Sign up
         </button>
-      </div>
+      </p>
     </div>
   );
 
