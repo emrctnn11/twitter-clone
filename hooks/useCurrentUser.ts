@@ -6,10 +6,11 @@ const useCurrentUser = () => {
   const { data, error, isLoading, mutate } = useSWR('/api/current', fetcher);
 
   return {
-    currentUser: data?.currentUser,
-    isLoading: !error && !data,
-    isError: error,
-  };
+    data,
+    error,
+    isLoading,
+    mutate
+  }
 };
 
 export default useCurrentUser;

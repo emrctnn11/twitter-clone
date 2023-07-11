@@ -1,29 +1,33 @@
-import useLoginModal from "../../hooks/useLoginModal";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useCallback, useState } from "react";
+import { signIn } from "next-auth/react";
+
+import useLoginModal from "@/hooks/useLoginModal";
+import useRegisterModal from "@/hooks/useRegisterModal";
+
 import Input from "../Input";
 import Modal from "../Modal";
-import useRegisterModal from "../../hooks/useRegisterModal";
-import axios from "axios";
-
-import React, { useCallback, useState } from "react";
-import { toast } from "react-hot-toast";
-import { signIn } from "next-auth/react";
 
 const RegisterModal = () => {
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
 
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
 
-  // Switch to register modal to login modal
+  const onToggle = useCallback(() => {
+    if (isLoading) {
+      return;
+    }
 
-  const openLoginDialog = useCallback(() => {
-    loginModal.handleOpen();
     registerModal.handleClose();
-  }, [loginModal, registerModal]);
+    loginModal.handleOpen();
+  }, [loginModal, registerModal, isLoading]);
 
   const onSubmit = useCallback(async () => {
     try {
@@ -31,51 +35,54 @@ const RegisterModal = () => {
 
       await axios.post("/api/register", {
         email,
-        name,
-        username,
         password,
+        username,
+        name,
       });
 
-      toast.success("Account created successfully! Please login to continue.");
+      setIsLoading(false);
 
-      signIn('credentials', {
+      toast.success("Account created.");
+
+      signIn("credentials", {
         email,
         password,
       });
 
       registerModal.handleClose();
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
-  }, [registerModal, email, name, username, password]);
+  }, [email, password, registerModal, username, name]);
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
       <Input
+        disabled={isLoading}
         placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
         value={email}
-        disabled={isLoading}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <Input
+        disabled={isLoading}
         placeholder="Name"
-        onChange={(e) => setName(e.target.value)}
         value={name}
-        disabled={isLoading}
+        onChange={(e) => setName(e.target.value)}
       />
       <Input
+        disabled={isLoading}
         placeholder="Username"
-        onChange={(e) => setUserName(e.target.value)}
         value={username}
-        disabled={isLoading}
+        onChange={(e) => setUsername(e.target.value)}
       />
       <Input
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-        value={password}
         disabled={isLoading}
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
       />
     </div>
   );
@@ -84,15 +91,17 @@ const RegisterModal = () => {
     <div className="text-neutral-400 text-center mt-4">
       <p>
         Already have an account?
-        {/* Changed span to button and added some styling */}
-        <button
-          onClick={() => openLoginDialog()}
-          className="text-white cursor-pointer hover:underline bg-transparent border-none outline-none"
-          role="button"
+        <span
+          onClick={onToggle}
+          className="
+            text-white 
+            cursor-pointer 
+            hover:underline
+          "
         >
           {" "}
-          Sign-in
-        </button>
+          Sign in
+        </span>
       </p>
     </div>
   );
