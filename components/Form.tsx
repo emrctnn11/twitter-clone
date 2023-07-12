@@ -6,7 +6,7 @@ import useLoginModal from "@/hooks/useLoginModal";
 import useRegisterModal from "@/hooks/useRegisterModal";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import usePosts from "@/hooks/usePosts";
-// import usePost from "@/hooks/usePost";
+import usePost from "@/hooks/usePost";
 
 import Button from "./Button";
 import Avatar from "./Avatar";
@@ -23,7 +23,7 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
 
   const { data: currentUser } = useCurrentUser();
   const { mutate: mutatePosts } = usePosts();
-  // const { mutate: mutatePost } = usePost(postId as string);
+  const { mutate: mutatePost } = usePost(postId as string);
 
   const [body, setBody] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,18 +32,21 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
     try {
       setIsLoading(true);
 
+      const url = isComment ? `/api/comments?postId=${postId}` : "/api/posts";
+
       await axios.post("/api/posts", { body });
 
       toast.success("Tweet sent!");
 
       setBody("");
       mutatePosts();
+      mutatePost();
     } catch (error) {
       toast.error("Error on Form.tsx");
     } finally {
       setIsLoading(false);
     }
-  }, [body, mutatePosts]);
+  }, [body, isComment, postId, mutatePosts, mutatePost]);
 
   return (
     <div className="border-b-[1px] border-neutral-800 px-5 py-2">
@@ -71,7 +74,11 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
             "
             />
             <div className="mt-4 flex flex-row justify-end">
-              <Button label="Tweet" onClick={onSubmit} disabled={isLoading || !body} />
+              <Button
+                label="Tweet"
+                onClick={onSubmit}
+                disabled={isLoading || !body}
+              />
             </div>
           </div>
         </div>
